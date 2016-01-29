@@ -80,6 +80,7 @@
     <module>nflow-rest-api</module>
     <module>nflow-engine</module>
     <module>nflow-jetty</module>
+    <module>nflow-spring-boot</module>
     <module>nflow-tests</module>
     <module>nflow-metrics</module>
     <module>nflow-perf-test</module>
@@ -144,6 +145,7 @@
     <swagger.version>1.5.6</swagger.version>
     <validation.api.version>1.1.0.Final</validation.api.version>
     <versions-maven-plugin.version>2.2</versions-maven-plugin.version>
+    <spring-boot.version>1.3.2.RELEASE</spring-boot.version>
   </properties>
   <build>
     <pluginManagement>
@@ -645,6 +647,22 @@
         <groupId>org.slf4j</groupId>
         <artifactId>jul-to-slf4j</artifactId>
         <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+        <version>${spring-boot.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-jetty</artifactId>
+        <version>${spring-boot.version}</version>
       </dependency>
       <dependency>
         <groupId>io.swagger</groupId>
