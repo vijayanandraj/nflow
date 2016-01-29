@@ -2,6 +2,7 @@ package com.nitorcreations.nflow.springboot;
 
 import com.nitorcreations.core.utils.KillProcess;
 import com.nitorcreations.nflow.springboot.configuration.JettyConfigurer;
+import com.nitorcreations.nflow.springboot.configuration.NflowJettyConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,9 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.HttpMessageConvertersAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
@@ -17,7 +20,7 @@ import org.springframework.boot.context.embedded.jetty.JettyEmbeddedServletConta
 import org.springframework.boot.context.embedded.jetty.JettyEmbeddedServletContainerFactory;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 import javax.inject.Inject;
@@ -25,10 +28,17 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 // TODO including @SpringBootApplication loads all kinds of crap, better to include those we actually want
-@SpringBootApplication(exclude = { DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class })
-@Configuration
+@SpringBootApplication(exclude = { DispatcherServletAutoConfiguration.class,
+        WebMvcAutoConfiguration.class, JacksonAutoConfiguration.class,
+        HttpMessageConvertersAutoConfiguration.class})
+@Import({NflowJettyConfiguration.class})
 public class Launcher extends SpringBootServletInitializer {
   private static final Logger logger = LoggerFactory.getLogger(Launcher.class);
+  @Value("${nflow.test.name}")
+  private String value;
+
+  @Inject
+  private Environment environment;
 
   public static void main(String[] args) {
     preSpringLaunchSetup();
@@ -44,12 +54,6 @@ public class Launcher extends SpringBootServletInitializer {
   protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
     return application.sources(Launcher.class);
   }
-
-  @Value("${nflow.test.name}")
-  private String value;
-
-  @Inject
-  private Environment environment;
 
   @Bean
   public EmbeddedServletContainerFactory containerFactory() throws UnknownHostException {

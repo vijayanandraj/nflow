@@ -1,6 +1,7 @@
 package com.nitorcreations.nflow.springboot.configuration;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.cxf.transport.servlet.CXFServlet;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Server;
@@ -47,6 +48,7 @@ public class JettyConfigurer implements JettyServerCustomizer {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    setupCxf(webAppContext);
   }
 
   private void setupJmx(Server server, Environment env) {
@@ -127,4 +129,9 @@ public class JettyConfigurer implements JettyServerCustomizer {
     return requestLogHandler;
   }
 
+  protected void setupCxf(final ServletContextHandler context) {
+    ServletHolder servlet = context.addServlet(CXFServlet.class, "/api/*");
+    servlet.setDisplayName("nflow-cxf-services");
+    servlet.setInitOrder(1);
+  }
 }
