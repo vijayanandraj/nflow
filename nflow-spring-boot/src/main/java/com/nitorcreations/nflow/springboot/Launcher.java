@@ -15,13 +15,17 @@ import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfigura
 import org.springframework.boot.autoconfigure.web.HttpMessageConvertersAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
+import org.springframework.boot.context.embedded.ErrorPage;
 import org.springframework.boot.context.embedded.jetty.JettyEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.jetty.JettyEmbeddedServletContainerFactory;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 
 import javax.inject.Inject;
 import java.net.InetAddress;
@@ -72,7 +76,7 @@ public class Launcher extends SpringBootServletInitializer {
     factory.setPort(port);
     factory.setAddress(bindAddress);
     factory.setDisplayName("nflow");
-    factory.setRegisterDefaultServlet(true);
+    factory.setRegisterDefaultServlet(false);
     factory.setRegisterJspServlet(false);
     factory.addServerCustomizers(new JettyConfigurer(environment));
 
@@ -81,4 +85,19 @@ public class Launcher extends SpringBootServletInitializer {
     return factory;
   }
 
+  @Bean
+  public EmbeddedServletContainerCustomizer containerCustomizer() {
+
+    return new EmbeddedServletContainerCustomizer() {
+      @Override
+      public void customize(ConfigurableEmbeddedServletContainer container) {
+
+        ErrorPage error401Page = new ErrorPage(HttpStatus.UNAUTHORIZED, "/401.html");
+        ErrorPage error404Page = new ErrorPage(HttpStatus.NOT_FOUND, "/404.html");
+        ErrorPage error500Page = new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html");
+
+        container.addErrorPages(error401Page, error404Page, error500Page);
+      }
+    };
+  }
 }
