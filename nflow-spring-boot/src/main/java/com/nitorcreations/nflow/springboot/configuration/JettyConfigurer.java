@@ -1,14 +1,13 @@
 package com.nitorcreations.nflow.springboot.configuration;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
@@ -16,49 +15,48 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.embedded.jetty.JettyServerCustomizer;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
-import static java.lang.String.valueOf;
+import static java.util.Arrays.asList;
 import static java.util.Collections.list;
-import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SECURITY;
-import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SESSIONS;
 
 public class JettyConfigurer implements JettyServerCustomizer {
   private static final Logger logger = LoggerFactory.getLogger(JettyConfigurer.class);
   private final Environment env;
+
   public JettyConfigurer(Environment env) {
     this.env = env;
   }
+
   @Override
   public void customize(Server server) {
     WebAppContext webAppContext = (WebAppContext) server.getHandler();
+    setupJmx(server, env);
     setupHandlers(server, webAppContext);
     try {
-      setupServletContextHandler(webAppContext, new String[]{});
+      setupServletContextHandler(webAppContext, env.getRequiredProperty("extra.resource.directories", String[].class));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-
-    // TODO configure jetty
-    // - request log
-    // - jmx
-    // - see StartNflow for more stuff
   }
 
-  private void setupServlet(ServletHandler servletHandler) {
-
+  private void setupJmx(Server server, Environment env) {
+    if (asList(env.getActiveProfiles()).contains("jmx")) {
+      logger.info("Enable JMX for Jetty");
+      MBeanContainer mbContainer = new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
+      server.addEventListener(mbContainer);
+      server.addBean(mbContainer);
+    }
   }
-
 
   private ServletContextHandler setupServletContextHandler(ServletContextHandler context, String[] extraStaticResources) throws IOException {
 
@@ -116,7 +114,9 @@ public class JettyConfigurer implements JettyServerCustomizer {
     // TODO is this good in production? This creates only one level of missing directories
     new File(directory).mkdir();
     NCSARequestLog requestLog = new NCSARequestLog(Paths.get(directory, "yyyy_mm_dd.request.log").toString());
-    requestLog.setRetainDays(90);
+    // TODO document configuration parameter
+    Integer retainDays = env.getProperty("nflow.jetty.accesslog.retainDays", Integer.class, 90);
+    requestLog.setRetainDays(retainDays);
     requestLog.setAppend(true);
     requestLog.setLogDateFormat("yyyy-MM-dd:HH:mm:ss Z");
     requestLog.setExtended(true);
