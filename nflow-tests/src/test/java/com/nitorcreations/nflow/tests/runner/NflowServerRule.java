@@ -1,27 +1,30 @@
 package com.nitorcreations.nflow.tests.runner;
 
-import com.nitorcreations.nflow.jetty.JettyServerContainer;
-import com.nitorcreations.nflow.jetty.StartNflow;
-import org.junit.rules.ExternalResource;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-import ru.yandex.qatools.embed.postgresql.PostgresExecutable;
-import ru.yandex.qatools.embed.postgresql.PostgresProcess;
-import ru.yandex.qatools.embed.postgresql.PostgresStarter;
-import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
-import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
-
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
+import static com.nitorcreations.nflow.engine.internal.config.Profiles.POSTGRESQL;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.right;
 import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 import static org.joda.time.DateTimeUtils.currentTimeMillis;
 import static org.junit.Assert.assertTrue;
 import static ru.yandex.qatools.embed.postgresql.distribution.Version.V9_5_0;
+
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.junit.rules.ExternalResource;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
+
+import com.nitorcreations.nflow.jetty.JettyServerContainer;
+import com.nitorcreations.nflow.jetty.StartNflow;
+
+import ru.yandex.qatools.embed.postgresql.PostgresExecutable;
+import ru.yandex.qatools.embed.postgresql.PostgresProcess;
+import ru.yandex.qatools.embed.postgresql.PostgresStarter;
+import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
+import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 
 public class NflowServerRule extends ExternalResource {
   private final Map<String, Object> props;
@@ -104,7 +107,9 @@ public class NflowServerRule extends ExternalResource {
   @Override
   public Statement apply(Statement base, Description description) {
     if (!props.containsKey("nflow.executor.group")) {
-      String processName = "nflow-tests-" + right(substringAfterLast(defaultString(description.getMethodName(), description.getClassName()), "."), 25) + "-" + currentTimeMillis();
+      String processName = "nflow-tests-"
+          + right(substringAfterLast(defaultString(description.getMethodName(), description.getClassName()), "."), 25) + "-"
+          + currentTimeMillis();
       props.put("nflow.executor.group", processName);
     }
     return super.apply(base, description);
@@ -127,12 +132,15 @@ public class NflowServerRule extends ExternalResource {
   }
 
   private void startDb() throws IOException {
-    PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
-    PostgresConfig config = new PostgresConfig(V9_5_0, new AbstractPostgresConfig.Net(), new AbstractPostgresConfig.Storage("nflow"), new AbstractPostgresConfig.Timeout(),
-            new AbstractPostgresConfig.Credentials("nflow", "nflow"));
-    PostgresExecutable exec = runtime.prepare(config);
-    process = exec.start();
-    props.put("nflow.db.postgresql.url", "jdbc:postgresql://" + config.net().host() + ":" + config.net().port() + "/nflow");
+    if (profiles.contains(POSTGRESQL)) {
+      PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
+      PostgresConfig config = new PostgresConfig(V9_5_0, new AbstractPostgresConfig.Net(),
+          new AbstractPostgresConfig.Storage("nflow"), new AbstractPostgresConfig.Timeout(),
+          new AbstractPostgresConfig.Credentials("nflow", "nflow"));
+      PostgresExecutable exec = runtime.prepare(config);
+      process = exec.start();
+      props.put("nflow.db.postgresql.url", "jdbc:postgresql://" + config.net().host() + ":" + config.net().port() + "/nflow");
+    }
   }
 
   private void stopDb() {
