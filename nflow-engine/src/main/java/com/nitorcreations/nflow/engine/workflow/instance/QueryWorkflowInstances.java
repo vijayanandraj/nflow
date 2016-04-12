@@ -5,12 +5,13 @@ import static java.util.Arrays.asList;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nitorcreations.nflow.engine.model.ModelObject;
 import com.nitorcreations.nflow.engine.workflow.instance.WorkflowInstance.WorkflowInstanceStatus;
 
 /**
  * Parameters for workflow instance query.
  */
-public class QueryWorkflowInstances {
+public class QueryWorkflowInstances extends ModelObject {
 
   /**
    * Workflow instance identifiers.

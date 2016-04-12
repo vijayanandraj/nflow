@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 
+import com.nitorcreations.nflow.engine.model.ModelObject;
 import com.nitorcreations.nflow.engine.workflow.definition.AbstractWorkflowDefinition;
 import com.nitorcreations.nflow.engine.workflow.definition.NextAction;
 import com.nitorcreations.nflow.engine.workflow.definition.StateExecution;
@@ -29,7 +30,7 @@ public interface WorkflowExecutorListener {
    * life-cycle methods.
    */
   @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "listeners are implemented by business applications")
-  public class ListenerContext {
+  public class ListenerContext extends ModelObject {
 
     /**
      * The time when the listener context was created.

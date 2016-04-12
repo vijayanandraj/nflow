@@ -7,16 +7,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.joda.time.DateTime;
 
 import com.nitorcreations.nflow.engine.internal.workflow.ObjectStringMapper;
+import com.nitorcreations.nflow.engine.model.ModelObject;
 
 /**
  * An instance of a workflow.
  */
-public class WorkflowInstance {
+public class WorkflowInstance extends ModelObject {
 
   /**
    * Describes the status for workflow instance.
@@ -163,11 +162,6 @@ public class WorkflowInstance {
     this.modified = builder.modified;
     this.started = builder.started;
     this.executorGroup = builder.executorGroup;
-  }
-
-  @Override
-  public String toString() {
-    return new ReflectionToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
   }
 
   /**

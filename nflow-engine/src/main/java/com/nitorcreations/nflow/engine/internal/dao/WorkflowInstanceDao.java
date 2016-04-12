@@ -59,6 +59,7 @@ import org.springframework.util.Assert;
 
 import com.nitorcreations.nflow.engine.internal.config.NFlow;
 import com.nitorcreations.nflow.engine.internal.storage.db.SQLVariants;
+import com.nitorcreations.nflow.engine.model.ModelObject;
 import com.nitorcreations.nflow.engine.workflow.instance.QueryWorkflowInstances;
 import com.nitorcreations.nflow.engine.workflow.instance.WorkflowInstance;
 import com.nitorcreations.nflow.engine.workflow.instance.WorkflowInstance.WorkflowInstanceStatus;
@@ -537,7 +538,7 @@ public class WorkflowInstanceDao {
     });
   }
 
-  private static class OptimisticLockKey implements Comparable<OptimisticLockKey> {
+  private static class OptimisticLockKey extends ModelObject implements Comparable<OptimisticLockKey> {
     public final int id;
     public final Timestamp modified;
 

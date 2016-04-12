@@ -3,13 +3,15 @@ package com.nitorcreations.nflow.engine.internal.workflow;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StoredWorkflowDefinition {
+import com.nitorcreations.nflow.engine.model.ModelObject;
+
+public class StoredWorkflowDefinition extends ModelObject {
   public String type;
   public String description;
   public String onError;
   public List<State> states;
 
-  public static class State implements Comparable<State> {
+  public static class State extends ModelObject implements Comparable<State> {
 
     public State() {
       // default constructor is required by Jackson deserializer

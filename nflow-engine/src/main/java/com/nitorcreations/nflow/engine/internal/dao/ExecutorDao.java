@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.nitorcreations.nflow.engine.internal.config.NFlow;
 import com.nitorcreations.nflow.engine.internal.storage.db.SQLVariants;
+import com.nitorcreations.nflow.engine.model.ModelObject;
 import com.nitorcreations.nflow.engine.workflow.executor.WorkflowExecutor;
 import com.nitorcreations.nflow.engine.workflow.instance.WorkflowInstanceAction;
 
@@ -174,7 +175,7 @@ public class ExecutorDao {
     }
   }
 
-  static final class InstanceInfo {
+  static final class InstanceInfo extends ModelObject {
     public int id;
     public String state;
   }

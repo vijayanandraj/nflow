@@ -11,10 +11,12 @@ import java.math.BigInteger;
 
 import org.joda.time.DateTime;
 
+import com.nitorcreations.nflow.engine.model.ModelObject;
+
 /**
  * Configuration for the workflow execution.
  */
-public class WorkflowSettings {
+public class WorkflowSettings extends ModelObject {
   /**
    * Minimum delay on execution retry after an error. Unit is milliseconds.
    */
